@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: "Fira Code", monospace;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            height: 100%;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        #password-form, #output {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a0a0a0;
+        }
+
+        .length-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        input[type="number"], input[type="range"], input[type="text"], textarea {
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #2a2a2a;
+            outline: none;
+            border-radius: 3px;
+            margin: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #ffffff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #ffffff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: #2a2a2a;
+            border: 1px solid #a0a0a0;
+            color: #ffffff;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #3a3a3a;
+        }
+
+        #copy-button.copied {
+            background-color: #4CAF50;
+        }
+
+        #strength-meter {
+            width: 100%;
+            height: 4px;
+            background-color: #2a2a2a;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #strength-meter-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #strength-text {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            text-align: right;
+            padding-bottom: 5px;
+        }
+
+        #advanced-options {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        #toggle-advanced {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            width: auto;
+        }
+
+        #toggle-advanced:hover {
+            color: #ffffff;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="app-container">
+            <div class="hero">
+                <h1>Password Generator</h1>
+            </div>
+            <div id="password-form">
+                <div class="length-control">
+                    <input type="number" id="lengthInput" min="4" max="50" value="12">
+                    <input type="range" id="lengthSlider" min="4" max="50" value="12">
+                </div>
+                <button onclick="generatePassword()">Generate Password</button>
+                <button id="toggle-advanced" onclick="toggleAdvancedOptions()">Advanced Options ▼</button>
+                <div id="advanced-options">
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="useSymbols" checked> Symbols
+                        </label>
+                        <label>
+                            <input type="checkbox" id="useNumbers" checked> Numbers
+                        </label>
+                        <label>
+                            <input type="checkbox" id="useLetters" checked> Letters
+                        </label>
+                    </div>
+                    <label for="customChars">Custom Characters:</label>
+                    <textarea id="customChars" placeholder="Enter your own set of characters to use"></textarea>
+                </div>
+            </div>
+            <div id="output">
+                <input type="text" id="password" readonly>
+                <div id="strength-meter">
+                    <div id="strength-meter-fill"></div>
+                </div>
+                <div id="strength-text"></div>
+                <button id="copy-button" onclick="copyPassword()">Copy Password</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const lengthSlider = document.getElementById('lengthSlider');
+        const lengthInput = document.getElementById('lengthInput');
+        const passwordOutput = document.getElementById('password');
+        const copyButton = document.getElementById('copy-button');
+        const customChars = document.getElementById('customChars');
+        const strengthMeterFill = document.getElementById('strength-meter-fill');
+        const strengthText = document.getElementById('strength-text');
+        const advancedOptions = document.getElementById('advanced-options');
+        const toggleAdvancedButton = document.getElementById('toggle-advanced');
+
+        function updateLength(value) {
+            lengthSlider.value = value;
+            lengthInput.value = value;
+            generatePassword();
+        }
+
+        lengthSlider.oninput = () => updateLength(lengthSlider.value);
+        lengthInput.oninput = () => updateLength(lengthInput.value);
+
+        function toggleAdvancedOptions() {
+            advancedOptions.style.display = advancedOptions.style.display === 'none' ? 'block' : 'none';
+            toggleAdvancedButton.textContent = advancedOptions.style.display === 'none' ? 'Advanced Options ▼' : 'Advanced Options ▲';
+        }
+
+        function generatePassword() {
+            const length = parseInt(lengthInput.value);
+            const useSymbols = document.getElementById('useSymbols').checked;
+            const useNumbers = document.getElementById('useNumbers').checked;
+            const useLetters = document.getElementById('useLetters').checked;
+            const customCharSet = customChars.value.trim();
+
+            let charset = customCharSet;
+            if (!customCharSet) {
+                if (useSymbols) charset += "!@#$%^&*()_+[]{}|;:,.<>?";
+                if (useNumbers) charset += "0123456789";
+                if (useLetters) charset += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            }
+
+            if (charset === "") {
+                alert("Please select at least one character type or provide custom characters.");
+                return;
+            }
+
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+            passwordOutput.value = password;
+            updateStrengthMeter(password);
+        }
+
+        function updateStrengthMeter(password) {
+            const strength = calculatePasswordStrength(password);
+            let color, text;
+
+            if (strength > 80) {
+                color = "#4CAF50";
+                text = "Very Strong";
+            } else if (strength > 60) {
+                color = "#8BC34A";
+                text = "Strong";
+            } else if (strength > 40) {
+                color = "#FFEB3B";
+                text = "Moderate";
+            } else if (strength > 20) {
+                color = "#FF9800";
+                text = "Weak";
+            } else {
+                color = "#F44336";
+                text = "Very Weak";
+            }
+
+            strengthMeterFill.style.width = strength + "%";
+            strengthMeterFill.style.backgroundColor = color;
+            strengthText.textContent = text;
+            strengthText.style.color = color;
+        }
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength += 20;
+            if (password.length >= 12) strength += 20;
+            if (/[a-z]/.test(password)) strength += 10;
+            if (/[A-Z]/.test(password)) strength += 10;
+            if (/\d/.test(password)) strength += 10;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+            if (password.length >= 16) strength += 20;
+            return Math.min(strength, 100);
+        }
+
+        function copyPassword() {
+            passwordOutput.select();
+            document.execCommand('copy');
+            copyButton.textContent = 'Copied!';
+            copyButton.classList.add('copied');
+            setTimeout(() => {
+                copyButton.textContent = 'Copy Password';
+                copyButton.classList.remove('copied');
+            }, 2000);
+        }
+
+        // Generate a password on page load
+        generatePassword();
+    </script>
+</body>
+</html>
