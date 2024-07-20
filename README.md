@@ -25,5 +25,3 @@ This tool allows you to generate secure, random passwords with customizable opti
 ## License
 
 This project is open source and available under the MIT License.
-
-Copyright (c) 2024 Cody Kler
